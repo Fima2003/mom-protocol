@@ -1,22 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useHealth } from '@/lib/HealthContext';
 
 export default function TotalSleep() {
-  const [totalHours, setTotalHours] = useState(0);
-
-  useEffect(() => {
-    const updateTotal = () => {
-      const totalLogged = localStorage.getItem('total-sleep-logged');
-      setTotalHours(totalLogged ? parseInt(totalLogged, 10) : 0);
-    };
-
-    updateTotal();
-
-    const interval = setInterval(updateTotal, 500);
-
-    return () => clearInterval(interval);
-  }, []);
+  const { healthData } = useHealth();
+  const totalHours = healthData?.sleep?.['total-sleep-logged'] || 0;
 
   return (
     <div className="bg-gradient-to-br from-purple-300 to-indigo-300 border-4 border-black p-6 pixel-shadow">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useHealth } from '@/lib/HealthContext';
 
 interface HealthStatusProps {
   completedTasks: number;
@@ -10,13 +10,14 @@ interface HealthStatusProps {
 }
 
 export default function HealthStatus({ completedTasks, momAdvice, momFace, isLoading }: HealthStatusProps) {
-  const [currentFeeling, setCurrentFeeling] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('currentFeeling');
-      return saved !== null ? parseInt(saved, 10) : 5;
+  const { healthData, updateHealthData } = useHealth();
+  const currentFeeling = healthData?.currentFeeling || 5;
+
+  const handleFeelingChange = async (newValue: number) => {
+    if (healthData) {
+      await updateHealthData({ currentFeeling: newValue });
     }
-    return 5;
-  });
+  };
 
   const getPredictedStatus = () => {
     if (completedTasks > 5) {
@@ -49,8 +50,7 @@ export default function HealthStatus({ completedTasks, momAdvice, momFace, isLoa
               value={currentFeeling}
               onChange={(e) => {
                 const newValue = Number(e.target.value);
-                setCurrentFeeling(newValue);
-                localStorage.setItem('currentFeeling', newValue.toString());
+                handleFeelingChange(newValue);
               }}
               className="flex-1"
             />

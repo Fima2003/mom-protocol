@@ -1,22 +1,17 @@
 'use client';
 
-import { useState } from 'react';
 import ClothingItem from './ClothingItem';
+import { useHealth } from '@/lib/HealthContext';
 
 export default function BundleUpSection() {
-  const [clothing, setClothing] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('clothing-items');
-      return saved ? JSON.parse(saved) : { socks: false, sweater: false, sweatpants: false };
-    }
-    return { socks: false, sweater: false, sweatpants: false };
-  });
+  const { healthData, updateHealthData } = useHealth();
+  const clothing = healthData?.clothing || { socks: false, sweater: false, sweatpants: false };
 
-  const toggleItem = (item: keyof typeof clothing) => {
+  const toggleItem = async (item: keyof typeof clothing) => {
     const newClothing = { ...clothing, [item]: !clothing[item] };
     const isAdding = newClothing[item];
-    setClothing(newClothing);
-    localStorage.setItem('clothing-items', JSON.stringify(newClothing));
+    
+    await updateHealthData({ clothing: newClothing });
     
     const event = new CustomEvent('activityCompleted', {
       detail: { 

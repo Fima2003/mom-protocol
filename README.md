@@ -2,6 +2,18 @@
 
 A playful, retro 8-bit web application for tracking recovery activities with cozy "mom advice" vibes.
 
+## ✨ New Features
+
+### 🔥 Firebase Integration
+- **Cloud Database**: All data is now stored in Firebase Firestore instead of localStorage
+- **Multi-Device Sync**: Access your health data from any device
+- **Real-time Updates**: Changes sync instantly across all devices
+
+### 🔗 Live Share Links
+- **Share Your Status**: Generate a unique shareable link to your health dashboard
+- **Read-Only Access**: Others can view your health status live without being able to edit
+- **Real-time Monitoring**: Perfect for letting someone check on you while you're resting!
+
 ## 🎮 Features
 
 ### 1. **Health Status Dashboard**
@@ -46,25 +58,55 @@ A playful, retro 8-bit web application for tracking recovery activities with coz
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 14+ (App Router)
+- **Database**: Firebase Firestore
 - **Styling**: Tailwind CSS with custom pixel-art utilities
-- **State Management**: React useState
+- **State Management**: React Context API
 - **Language**: TypeScript
+- **Real-time Sync**: Firestore real-time listeners
 
 ## 🚀 Getting Started
 
-### Installation
+### Prerequisites
 
-```bash
-npm install
-```
+- Node.js 18+ installed
+- A Google account (for Firebase)
 
-### Development
+### Firebase Setup
 
-```bash
-npm run dev
-```
+Before running the app, you need to set up Firebase. Follow the detailed guide:
 
-Open [http://localhost:3000](http://localhost:3000) to see the app.
+**[📖 Firebase Setup Guide](./FIREBASE_SETUP.md)**
+
+### Quick Start
+
+1. **Clone and install**:
+   ```bash
+   npm install
+   ```
+
+2. **Set up Firebase** (see [FIREBASE_SETUP.md](./FIREBASE_SETUP.md))
+
+3. **Create `.env.local`** with your Firebase config:
+   ```bash
+   cp .env.example .env.local
+   # Then edit .env.local with your Firebase credentials
+   ```
+
+4. **Run the development server**:
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:3000](http://localhost:3000)
+
+## 🔗 Using Share Links
+
+1. Click the **"🔗 Share Live Link"** button on your dashboard
+2. Copy the generated link
+3. Share it with friends or family
+4. They can view your health status in real-time without editing privileges
+
+Perfect for letting someone monitor your recovery remotely!
 
 ### Build
 
@@ -77,16 +119,25 @@ npm start
 
 ```
 ├── app/
-│   ├── layout.tsx          # Root layout with metadata
+│   ├── layout.tsx          # Root layout with HealthProvider
 │   ├── page.tsx            # Main dashboard page
+│   ├── view/[userId]/      # Shared view page (read-only)
+│   │   └── page.tsx
 │   └── globals.css         # Global styles with pixel-art animations
 ├── components/
 │   ├── BundleUpSection.tsx    # Clothing tracker with pixel person
 │   ├── ClothingItem.tsx       # Individual clothing item component
 │   ├── HealthStatus.tsx       # Health input & AI prediction
 │   ├── ResourceCounter.tsx    # Reusable counter for food/drinks
+│   ├── ShareLink.tsx          # Share link modal component
 │   ├── SleepLogger.tsx        # Sleep tracking with stepper
+│   ├── TotalSleep.tsx         # Total sleep display
 │   └── VentilationTracker.tsx # Window timer component
+├── lib/
+│   ├── firebase.ts            # Firebase configuration
+│   ├── healthData.ts          # Firestore data operations
+│   ├── HealthContext.tsx      # React Context for health data
+│   └── userId.ts              # User ID management
 └── public/                    # Static assets
 ```
 

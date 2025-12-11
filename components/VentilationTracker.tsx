@@ -1,31 +1,39 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useHealth } from '@/lib/HealthContext';
 
 export default function VentilationTracker() {
-  const [isOpen, setIsOpen] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('ventilation-isOpen') === 'true';
+  const { healthData, updateHealthData } = useHealth();
+  const [isOpen, setIsOpen] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const initializedRef = useRef(false);
+
+  useEffect(() => {
+    if (healthData?.ventilation && !initializedRef.current) {
+      initializedRef.current = true;
+      setIsOpen(healthData.ventilation.isOpen);
+      if (healthData.ventilation.isOpen && healthData.ventilation.startTime) {
+        const elapsed = Math.floor((Date.now() - healthData.ventilation.startTime) / 1000);
+        const remaining = Math.max(0, 300 - elapsed);
+        setTimeRemaining(remaining);
+      }
     }
-    return false;
-  });
-  const [timeRemaining, setTimeRemaining] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const savedTime = localStorage.getItem('ventilation-timeRemaining');
-      return savedTime ? parseInt(savedTime, 10) : 0;
-    }
-    return 0;
-  });
+  }, [healthData]);
 
   useEffect(() => {
     if (timeRemaining > 0) {
       const timer = setInterval(() => {
         setTimeRemaining((prev) => {
           const newTime = prev <= 1 ? 0 : prev - 1;
-          localStorage.setItem('ventilation-timeRemaining', newTime.toString());
           if (newTime === 0) {
             setIsOpen(false);
-            localStorage.setItem('ventilation-isOpen', 'false');
+            updateHealthData({
+              ventilation: {
+                isOpen: false,
+                startTime: null
+              }
+            });
           }
           return newTime;
         });
@@ -33,14 +41,19 @@ export default function VentilationTracker() {
       
       return () => clearInterval(timer);
     }
-  }, [timeRemaining]);
+  }, [timeRemaining, updateHealthData]);
 
-  const toggleWindow = () => {
+  const toggleWindow = async () => {
     if (!isOpen) {
       setIsOpen(true);
-      setTimeRemaining(300); // 5 minutes in seconds
-      localStorage.setItem('ventilation-isOpen', 'true');
-      localStorage.setItem('ventilation-timeRemaining', '300');
+      setTimeRemaining(300);
+      
+      await updateHealthData({
+        ventilation: {
+          isOpen: true,
+          startTime: Date.now()
+        }
+      });
       
       const event = new CustomEvent('activityCompleted', {
         detail: { type: 'Fresh Air', detail: 'Opened window for ventilation' }

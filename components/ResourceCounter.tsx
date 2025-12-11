@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useHealth } from '@/lib/HealthContext';
 
 interface ResourceCounterProps {
   icon: string;
@@ -9,22 +10,24 @@ interface ResourceCounterProps {
 }
 
 export default function ResourceCounter({ icon, label, color }: ResourceCounterProps) {
-  const storageKey = `resource-${label}`;
-  const [count, setCount] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(storageKey);
-      return saved !== null ? parseInt(saved, 10) : 0;
-    }
-    return 0;
-  });
+  const { healthData, updateHealthData } = useHealth();
+  const storageKey = `resource-${label}` as keyof typeof healthData.resources;
+  const count = healthData?.resources?.[storageKey] || 0;
   const [animate, setAnimate] = useState(false);
 
-  const increment = () => {
+  const increment = async () => {
     const newCount = count + 1;
-    setCount(newCount);
-    localStorage.setItem(storageKey, newCount.toString());
     setAnimate(true);
     setTimeout(() => setAnimate(false), 300);
+    
+    if (healthData) {
+      await updateHealthData({
+        resources: {
+          ...healthData.resources,
+          [storageKey]: newCount
+        }
+      });
+    }
     
     const event = new CustomEvent('activityCompleted', {
       detail: { type: 'Nourishment', detail: `Had ${label}` }

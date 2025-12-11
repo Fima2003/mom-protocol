@@ -1,27 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import HealthStatus from '@/components/HealthStatus';
 import BundleUpSection from '@/components/BundleUpSection';
 import ResourceCounter from '@/components/ResourceCounter';
 import SleepLogger from '@/components/SleepLogger';
 import VentilationTracker from '@/components/VentilationTracker';
 import TotalSleep from '@/components/TotalSleep';
-
-interface Activity {
-  type: string;
-  detail: string;
-  timestamp: number;
-}
+import ShareLink from '@/components/ShareLink';
+import { useHealth } from '@/lib/HealthContext';
+import { Activity } from '@/lib/healthData';
 
 export default function Home() {
-  const [activities, setActivities] = useState<Activity[]>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('activities');
-      return saved ? JSON.parse(saved) : [];
-    }
-    return [];
-  });
+  const { userId, healthData, updateHealthData } = useHealth();
 
   const [momAdvice, setMomAdvice] = useState<{ message: string; face: string }>({
     message: "Start taking care of yourself, sweetie!",
@@ -30,14 +21,7 @@ export default function Home() {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleResetAllData = () => {
-    if (confirm('Are you sure you want to erase ALL saved data? This cannot be undone.')) {
-      localStorage.clear();
-      window.location.reload();
-    }
-  };
-
-  const fetchMomAdvice = async (activityList: Activity[]) => {
+  const fetchMomAdvice = useCallback(async (activityList: Activity[]) => {
     setIsLoading(true);
     try {
       const response = await fetch('/api/mom-advice', {
@@ -55,6 +39,38 @@ export default function Home() {
       });
     }
     setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    if (healthData?.activities && healthData.activities.length > 0) {
+      fetchMomAdvice(healthData.activities);
+    }
+  }, [healthData?.activities, fetchMomAdvice]);
+
+  const handleResetAllData = async () => {
+    if (confirm('Are you sure you want to erase ALL saved data? This cannot be undone.')) {
+      const defaultData = {
+        activities: [],
+        clothing: { socks: false, sweater: false, sweatpants: false },
+        resources: {
+          'resource-Soup Bowls': 0,
+          'resource-Hot Tea': 0,
+          'resource-Water Glasses': 0
+        },
+        sleep: {
+          'sleep-hours-Good Night Sleep 🌙': 8,
+          'sleep-hours-Day Nap 😴': 8,
+          'total-sleep-logged': 0
+        },
+        ventilation: {
+          isOpen: false,
+          startTime: null
+        },
+        currentFeeling: 5
+      };
+      await updateHealthData(defaultData);
+      window.location.reload();
+    }
   };
 
   useEffect(() => {
@@ -66,32 +82,28 @@ export default function Home() {
         timestamp: Date.now()
       };
 
-      setActivities(prev => {
-        const updated = [...prev, newActivity];
-        localStorage.setItem('activities', JSON.stringify(updated));
+      if (healthData) {
+        const updated = [...healthData.activities, newActivity];
         fetchMomAdvice(updated);
-        return updated;
-      });
+        updateHealthData({
+          activities: updated
+        });
+      }
     };
 
     window.addEventListener('activityCompleted', handleActivityUpdate as EventListener);
 
-    // Fetch initial advice
-    if (activities.length > 0) {
-      fetchMomAdvice(activities);
-    }
-
     return () => {
       window.removeEventListener('activityCompleted', handleActivityUpdate as EventListener);
     };
-  }, []);
+  }, [healthData, updateHealthData, fetchMomAdvice]);
 
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header & Health Status */}
         <HealthStatus 
-          completedTasks={activities.length} 
+          completedTasks={healthData?.activities.length || 0} 
           momAdvice={momAdvice.message}
           momFace={momAdvice.face}
           isLoading={isLoading}
@@ -160,8 +172,9 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Admin Button */}
-        <div className="text-center">
+        {/* Admin Buttons */}
+        <div className="flex gap-4 justify-center">
+          <ShareLink userId={userId} />
           <button
             onClick={handleResetAllData}
             className="bg-red-600 hover:bg-red-700 text-white border-4 border-black px-6 py-3 pixel-shadow transition-colors text-sm font-bold"

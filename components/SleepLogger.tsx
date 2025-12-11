@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useHealth } from '@/lib/HealthContext';
 
 interface SleepLoggerProps {
   title: string;
@@ -8,33 +9,47 @@ interface SleepLoggerProps {
 }
 
 export default function SleepLogger({ title }: SleepLoggerProps) {
-  const storageKey = `sleep-hours-${title}`;
-  const [hours, setHours] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(storageKey);
-      return saved !== null ? parseInt(saved, 10) : 8;
-    }
-    return 8;
-  });
+  const { healthData, updateHealthData } = useHealth();
+  const storageKey = `sleep-hours-${title}` as keyof typeof healthData.sleep;
+  const hours = healthData?.sleep?.[storageKey] || 8;
   const [showZzz, setShowZzz] = useState(false);
 
-  const increment = () => {
+  const increment = async () => {
     const newHours = Math.min(24, hours + 1);
-    setHours(newHours);
-    localStorage.setItem(storageKey, newHours.toString());
+    if (healthData) {
+      await updateHealthData({
+        sleep: {
+          ...healthData.sleep,
+          [storageKey]: newHours
+        }
+      });
+    }
   };
 
-  const decrement = () => {
+  const decrement = async () => {
     const newHours = Math.max(0, hours - 1);
-    setHours(newHours);
-    localStorage.setItem(storageKey, newHours.toString());
+    if (healthData) {
+      await updateHealthData({
+        sleep: {
+          ...healthData.sleep,
+          [storageKey]: newHours
+        }
+      });
+    }
   };
 
-  const logSleep = () => {
-    const totalKey = 'total-sleep-logged';
-    const currentTotal = localStorage.getItem(totalKey);
-    const newTotal = (currentTotal ? parseInt(currentTotal, 10) : 0) + hours;
-    localStorage.setItem(totalKey, newTotal.toString());
+  const logSleep = async () => {
+    if (!healthData) return;
+    
+    const currentTotal = healthData.sleep['total-sleep-logged'] || 0;
+    const newTotal = currentTotal + hours;
+    
+    await updateHealthData({
+      sleep: {
+        ...healthData.sleep,
+        'total-sleep-logged': newTotal
+      }
+    });
     
     setShowZzz(true);
     setTimeout(() => setShowZzz(false), 2000);

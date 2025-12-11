@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { HealthProvider } from "@/lib/HealthContext";
 
 export const metadata: Metadata = {
   title: "Mom's Sick Day Protocol",
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {children}
+        <HealthProvider>
+          {children}
+        </HealthProvider>
       </body>
     </html>
   );
