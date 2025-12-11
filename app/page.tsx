@@ -69,6 +69,8 @@ export default function Home() {
                 />
               </div>
             </div>
+
+            <TotalSleep />
           </div>
 
           {/* Rest & Recovery Zone */}
@@ -86,8 +88,6 @@ export default function Home() {
                 />
               </div>
             </div>
-
-            <TotalSleep />
 
             <VentilationTracker />
           </div>
