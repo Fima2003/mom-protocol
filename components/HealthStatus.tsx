@@ -4,9 +4,12 @@ import { useState } from 'react';
 
 interface HealthStatusProps {
   completedTasks: number;
+  momAdvice: string;
+  momFace: string;
+  isLoading: boolean;
 }
 
-export default function HealthStatus({ completedTasks }: HealthStatusProps) {
+export default function HealthStatus({ completedTasks, momAdvice, momFace, isLoading }: HealthStatusProps) {
   const [currentFeeling, setCurrentFeeling] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('currentFeeling');
@@ -17,11 +20,11 @@ export default function HealthStatus({ completedTasks }: HealthStatusProps) {
 
   const getPredictedStatus = () => {
     if (completedTasks > 5) {
-      return { face: '😊', message: 'Recovering well!', color: 'text-green-600' };
+      return { color: 'text-green-600' };
     } else if (completedTasks > 2) {
-      return { face: '😐', message: 'Getting there...', color: 'text-yellow-600' };
+      return { color: 'text-yellow-600' };
     } else {
-      return { face: '😔', message: 'Need more care', color: 'text-red-600' };
+      return { color: 'text-red-600' };
     }
   };
 
@@ -61,9 +64,13 @@ export default function HealthStatus({ completedTasks }: HealthStatusProps) {
         {/* AI Predicted Status */}
         <div className="border-4 border-black bg-white p-4">
           <div className="text-xs text-black mb-2 text-center">Mom AI Prediction:</div>
-          <div className="text-5xl text-center mb-2">{status.face}</div>
-          <div className={`text-xs text-center font-bold ${status.color}`}>
-            {status.message}
+          <div className="text-5xl text-center mb-2">{momFace}</div>
+          <div className={`text-xs text-center font-bold ${status.color} min-h-[3rem] flex items-center justify-center`}>
+            {isLoading ? (
+              <span className="animate-pulse">Thinking... 💭</span>
+            ) : (
+              momAdvice
+            )}
           </div>
           <div className="text-xs text-center text-gray-600 mt-1">
             ({completedTasks} activities done)

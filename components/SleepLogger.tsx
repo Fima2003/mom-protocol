@@ -38,6 +38,11 @@ export default function SleepLogger({ title }: SleepLoggerProps) {
     
     setShowZzz(true);
     setTimeout(() => setShowZzz(false), 2000);
+    
+    const event = new CustomEvent('activityCompleted', {
+      detail: { type: 'Rest', detail: `${title} for ${hours} hours` }
+    });
+    window.dispatchEvent(event);
   };
 
   return (

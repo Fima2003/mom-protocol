@@ -41,6 +41,11 @@ export default function VentilationTracker() {
       setTimeRemaining(300); // 5 minutes in seconds
       localStorage.setItem('ventilation-isOpen', 'true');
       localStorage.setItem('ventilation-timeRemaining', '300');
+      
+      const event = new CustomEvent('activityCompleted', {
+        detail: { type: 'Fresh Air', detail: 'Opened window for ventilation' }
+      });
+      window.dispatchEvent(event);
     }
   };
 

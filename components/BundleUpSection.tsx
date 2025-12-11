@@ -14,8 +14,17 @@ export default function BundleUpSection() {
 
   const toggleItem = (item: keyof typeof clothing) => {
     const newClothing = { ...clothing, [item]: !clothing[item] };
+    const isAdding = newClothing[item];
     setClothing(newClothing);
     localStorage.setItem('clothing-items', JSON.stringify(newClothing));
+    
+    const event = new CustomEvent('activityCompleted', {
+      detail: { 
+        type: 'Warmth', 
+        detail: `${isAdding ? 'Put on' : 'Removed'} ${String(item)}` 
+      }
+    });
+    window.dispatchEvent(event);
   };
 
   return (

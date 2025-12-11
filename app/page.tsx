@@ -8,37 +8,87 @@ import SleepLogger from '@/components/SleepLogger';
 import VentilationTracker from '@/components/VentilationTracker';
 import TotalSleep from '@/components/TotalSleep';
 
+interface Activity {
+  type: string;
+  detail: string;
+  timestamp: number;
+}
+
 export default function Home() {
-  const [completedTasks, setCompletedTasks] = useState(() => {
+  const [activities, setActivities] = useState<Activity[]>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('completedTasks');
-      return saved !== null ? parseInt(saved, 10) : 0;
+      const saved = localStorage.getItem('activities');
+      return saved ? JSON.parse(saved) : [];
     }
-    return 0;
+    return [];
   });
 
-  // Mock task tracking - in reality you'd track actual interactions
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate task completion tracking
-      const activities = document.querySelectorAll('button:active');
-      if (activities.length > 0) {
-        setCompletedTasks(prev => {
-          const newCount = prev + 1;
-          localStorage.setItem('completedTasks', newCount.toString());
-          return newCount;
-        });
-      }
-    }, 5000);
+  const [momAdvice, setMomAdvice] = useState<{ message: string; face: string }>({
+    message: "Start taking care of yourself, sweetie!",
+    face: '😔'
+  });
 
-    return () => clearInterval(interval);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchMomAdvice = async (activityList: Activity[]) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/mom-advice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activities: activityList })
+      });
+      const data = await response.json();
+      setMomAdvice(data);
+    } catch (error) {
+      console.error('Error fetching mom advice:', error);
+      setMomAdvice({
+        message: "Keep going, dear. Mom is proud of you!",
+        face: '💝'
+      });
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    const handleActivityUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<{ type: string; detail: string }>;
+      const newActivity: Activity = {
+        type: customEvent.detail.type,
+        detail: customEvent.detail.detail,
+        timestamp: Date.now()
+      };
+
+      setActivities(prev => {
+        const updated = [...prev, newActivity];
+        localStorage.setItem('activities', JSON.stringify(updated));
+        fetchMomAdvice(updated);
+        return updated;
+      });
+    };
+
+    window.addEventListener('activityCompleted', handleActivityUpdate as EventListener);
+
+    // Fetch initial advice
+    if (activities.length > 0) {
+      fetchMomAdvice(activities);
+    }
+
+    return () => {
+      window.removeEventListener('activityCompleted', handleActivityUpdate as EventListener);
+    };
   }, []);
 
   return (
     <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header & Health Status */}
-        <HealthStatus completedTasks={completedTasks} />
+        <HealthStatus 
+          completedTasks={activities.length} 
+          momAdvice={momAdvice.message}
+          momFace={momAdvice.face}
+          isLoading={isLoading}
+        />
 
         {/* Main Grid Layout */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

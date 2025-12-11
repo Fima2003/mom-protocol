@@ -25,6 +25,11 @@ export default function ResourceCounter({ icon, label, color }: ResourceCounterP
     localStorage.setItem(storageKey, newCount.toString());
     setAnimate(true);
     setTimeout(() => setAnimate(false), 300);
+    
+    const event = new CustomEvent('activityCompleted', {
+      detail: { type: 'Nourishment', detail: `Had ${label}` }
+    });
+    window.dispatchEvent(event);
   };
 
   return (
