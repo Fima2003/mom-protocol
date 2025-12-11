@@ -1,53 +1,47 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useHealth } from '@/lib/HealthContext';
+
+const VENTILATION_DURATION = 300; // 5 minutes in seconds
+
+function calculateTimeRemaining(startTime: number | null): number {
+  if (!startTime) return 0;
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  return Math.max(0, VENTILATION_DURATION - elapsed);
+}
 
 export default function VentilationTracker() {
   const { healthData, updateHealthData } = useHealth();
-  const [isOpen, setIsOpen] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(0);
-  const initializedRef = useRef(false);
+  const [, setTick] = useState(0);
 
-  useEffect(() => {
-    if (healthData?.ventilation && !initializedRef.current) {
-      initializedRef.current = true;
-      setIsOpen(healthData.ventilation.isOpen);
-      if (healthData.ventilation.isOpen && healthData.ventilation.startTime) {
-        const elapsed = Math.floor((Date.now() - healthData.ventilation.startTime) / 1000);
-        const remaining = Math.max(0, 300 - elapsed);
-        setTimeRemaining(remaining);
-      }
-    }
-  }, [healthData]);
+  const isOpen = healthData?.ventilation?.isOpen ?? false;
+  const startTime = healthData?.ventilation?.startTime ?? null;
+  const timeRemaining = isOpen ? calculateTimeRemaining(startTime) : 0;
 
+  // Single interval that ticks every second when window is open
   useEffect(() => {
-    if (timeRemaining > 0) {
-      const timer = setInterval(() => {
-        setTimeRemaining((prev) => {
-          const newTime = prev <= 1 ? 0 : prev - 1;
-          if (newTime === 0) {
-            setIsOpen(false);
-            updateHealthData({
-              ventilation: {
-                isOpen: false,
-                startTime: null
-              }
-            });
+    if (!isOpen || !startTime) return;
+
+    const timer = setInterval(() => {
+      const remaining = calculateTimeRemaining(startTime);
+      if (remaining <= 0) {
+        updateHealthData({
+          ventilation: {
+            isOpen: false,
+            startTime: null
           }
-          return newTime;
         });
-      }, 1000);
-      
-      return () => clearInterval(timer);
-    }
-  }, [timeRemaining, updateHealthData]);
+      } else {
+        setTick(t => t + 1); // Force re-render to update displayed time
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isOpen, startTime, updateHealthData]);
 
   const toggleWindow = async () => {
     if (!isOpen) {
-      setIsOpen(true);
-      setTimeRemaining(300);
-      
       await updateHealthData({
         ventilation: {
           isOpen: true,
