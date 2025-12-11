@@ -20,13 +20,13 @@ export default function ClothingItem({ label, imageSrc, onClick, isActive, width
         isActive ? 'opacity-100' : 'opacity-30'
       }`}
       title={label}
-      style={{ width: width / 2, height: height / 2 }}
+      style={{ width: width / 6, height: height / 6 }}
     >
       <Image
         src={imageSrc}
         alt={label}
-        width={width}
-        height={height}
+        width={width/6}
+        height={height/6}
         className="w-full h-full pointer-events-none"
       />
     </button>
