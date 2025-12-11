@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
     const activityList = activities.map((a: { type: string; detail: string; timestamp: number }) => 
       `- ${a.type}: ${a.detail}`
