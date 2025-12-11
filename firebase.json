@@ -1,0 +1,14 @@
+{
+  "apphosting": {
+    "backendId": "mom-protocol",
+    "rootDir": "/",
+    "ignore": [
+      "node_modules",
+      ".git",
+      ".env.local",
+      "firebase-debug.log",
+      "firebase-debug.*.log",
+      "functions"
+    ]
+  }
+}
