@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import "tailwindcss";
+
+* {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+body {
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 25%, #CD853F 50%, #A0522D 75%, #8B4513 100%);
+  background-attachment: fixed;
+  font-family: 'Press Start 2P', cursive;
+  min-height: 100vh;
+}
+
+@layer utilities {
+  .pixel-border {
+    box-shadow: 
+      0 0 0 2px #000,
+      0 0 0 4px #fff,
+      0 0 0 6px #000;
+  }
+  
+  .pixel-border-sm {
+    box-shadow: 
+      0 0 0 1px #000,
+      0 0 0 2px #fff,
+      0 0 0 3px #000;
+  }
+
+  .pixel-shadow {
+    box-shadow: 4px 4px 0px #000;
+  }
+
+  .pixel-glow {
+    animation: glow 1.5s ease-in-out infinite;
+  }
+
+  .pixel-bounce {
+    animation: bounce 0.3s ease;
+  }
+
+  .pixel-shine {
+    animation: shine 2s ease-in-out infinite;
+  }
+
+  .pixel-press {
+    transform: translateY(2px);
+    box-shadow: 2px 2px 0px #000;
+  }
+}
+
+@keyframes glow {
+  0%, 100% { 
+    filter: brightness(1);
+  }
+  50% { 
+    filter: brightness(1.3);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% { 
+    transform: translateY(0);
+  }
+  50% { 
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes shine {
+  0%, 100% { 
+    opacity: 1;
+  }
+  50% { 
+    opacity: 0.7;
+  }
+}
