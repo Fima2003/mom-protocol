@@ -10,8 +10,8 @@ interface SleepLoggerProps {
 
 export default function SleepLogger({ title }: SleepLoggerProps) {
   const { healthData, updateHealthData } = useHealth();
-  const storageKey = `sleep-hours-${title}` as keyof typeof healthData.sleep;
-  const hours = healthData?.sleep?.[storageKey] || 8;
+  const storageKey = healthData ? `sleep-hours-${title}` as keyof typeof healthData.sleep : null;
+  const hours = healthData?.sleep?.[storageKey as keyof typeof healthData.sleep] || 8;
   const [showZzz, setShowZzz] = useState(false);
 
   const increment = async () => {

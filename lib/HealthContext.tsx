@@ -14,19 +14,18 @@ interface HealthContextType {
 const HealthContext = createContext<HealthContextType | undefined>(undefined);
 
 export function HealthProvider({ children }: { children: ReactNode }) {
-  const [userId, setUserId] = useState('');
+  const initializedRef = useRef(false);
+  const id = initializedRef.current ? '' : getUserId();
+  const [userId, setUserId] = useState(id);
   const [healthData, setHealthData] = useState<HealthData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const initializedRef = useRef(false);
 
   useEffect(() => {
     if (!initializedRef.current) {
       initializedRef.current = true;
-      const id = getUserId();
-      setUserId(id);
-      initializeHealthData(id);
+      initializeHealthData(userId);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;

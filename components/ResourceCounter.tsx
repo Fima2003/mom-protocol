@@ -11,8 +11,8 @@ interface ResourceCounterProps {
 
 export default function ResourceCounter({ icon, label, color }: ResourceCounterProps) {
   const { healthData, updateHealthData } = useHealth();
-  const storageKey = `resource-${label}` as keyof typeof healthData.resources;
-  const count = healthData?.resources?.[storageKey] || 0;
+  const storageKey = healthData ? `resource-${label}` as keyof typeof healthData.resources : null;
+  const count = healthData?.resources?.[storageKey as keyof typeof healthData.resources] || 0;
   const [animate, setAnimate] = useState(false);
 
   const increment = async () => {
