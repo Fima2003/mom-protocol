@@ -6,6 +6,7 @@ import BundleUpSection from '@/components/BundleUpSection';
 import ResourceCounter from '@/components/ResourceCounter';
 import SleepLogger from '@/components/SleepLogger';
 import VentilationTracker from '@/components/VentilationTracker';
+import TotalSleep from '@/components/TotalSleep';
 
 export default function Home() {
   const [completedTasks, setCompletedTasks] = useState(() => {
@@ -85,6 +86,8 @@ export default function Home() {
                 />
               </div>
             </div>
+
+            <TotalSleep />
 
             <VentilationTracker />
           </div>

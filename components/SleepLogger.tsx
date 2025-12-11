@@ -31,6 +31,11 @@ export default function SleepLogger({ title }: SleepLoggerProps) {
   };
 
   const logSleep = () => {
+    const totalKey = 'total-sleep-logged';
+    const currentTotal = localStorage.getItem(totalKey);
+    const newTotal = (currentTotal ? parseInt(currentTotal, 10) : 0) + hours;
+    localStorage.setItem(totalKey, newTotal.toString());
+    
     setShowZzz(true);
     setTimeout(() => setShowZzz(false), 2000);
   };
