@@ -49,10 +49,7 @@ export default function HealthStatus({ completedTasks }: HealthStatusProps) {
                 setCurrentFeeling(newValue);
                 localStorage.setItem('currentFeeling', newValue.toString());
               }}
-              className="flex-1 h-4 border-2 border-black pixel-shadow"
-              style={{
-                background: `linear-gradient(to right, #ef4444 0%, #fbbf24 50%, #22c55e 100%)`
-              }}
+              className="flex-1"
             />
             <span className="text-xs text-black">😄 10</span>
           </div>
