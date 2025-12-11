@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useHealth } from '@/lib/HealthContext';
+import { SleepData } from '@/lib/healthData';
 
 interface SleepLoggerProps {
   title: string;
@@ -10,13 +11,13 @@ interface SleepLoggerProps {
 
 export default function SleepLogger({ title }: SleepLoggerProps) {
   const { healthData, updateHealthData } = useHealth();
-  const storageKey = healthData ? `sleep-hours-${title}` as keyof typeof healthData.sleep : null;
-  const hours = healthData?.sleep?.[storageKey as keyof typeof healthData.sleep] || 8;
+  const storageKey = `sleep-hours-${title}` as keyof SleepData;
+  const hours = (healthData?.sleep?.[storageKey] as number) ?? 8;
   const [showZzz, setShowZzz] = useState(false);
 
   const increment = async () => {
     const newHours = Math.min(24, hours + 1);
-    if (healthData) {
+    if (healthData?.sleep) {
       await updateHealthData({
         sleep: {
           ...healthData.sleep,
@@ -28,7 +29,7 @@ export default function SleepLogger({ title }: SleepLoggerProps) {
 
   const decrement = async () => {
     const newHours = Math.max(0, hours - 1);
-    if (healthData) {
+    if (healthData?.sleep) {
       await updateHealthData({
         sleep: {
           ...healthData.sleep,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useTransition } from 'react';
 import HealthStatus from '@/components/HealthStatus';
 import BundleUpSection from '@/components/BundleUpSection';
 import ResourceCounter from '@/components/ResourceCounter';
@@ -19,10 +19,10 @@ export default function Home() {
     face: '😔'
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const lastFetchedLengthRef = useRef<number>(0);
 
   const fetchMomAdvice = useCallback(async (activityList: Activity[]) => {
-    setIsLoading(true);
     try {
       const response = await fetch('/api/mom-advice', {
         method: 'POST',
@@ -38,14 +38,17 @@ export default function Home() {
         face: '💝'
       });
     }
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {
-    if (healthData?.activities && healthData.activities.length > 0) {
-      fetchMomAdvice(healthData.activities);
+    const activitiesLength = healthData?.activities?.length ?? 0;
+    if (activitiesLength > 0 && activitiesLength !== lastFetchedLengthRef.current) {
+      lastFetchedLengthRef.current = activitiesLength;
+      startTransition(() => {
+        fetchMomAdvice(healthData!.activities);
+      });
     }
-  }, [healthData?.activities, fetchMomAdvice]);
+  }, [healthData, fetchMomAdvice]);
 
   const handleResetAllData = async () => {
     if (confirm('Are you sure you want to erase ALL saved data? This cannot be undone.')) {
@@ -106,7 +109,7 @@ export default function Home() {
           completedTasks={healthData?.activities.length || 0} 
           momAdvice={momAdvice.message}
           momFace={momAdvice.face}
-          isLoading={isLoading}
+          isLoading={isPending}
         />
 
         {/* Main Grid Layout */}

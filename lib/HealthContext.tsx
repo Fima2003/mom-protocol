@@ -15,8 +15,7 @@ const HealthContext = createContext<HealthContextType | undefined>(undefined);
 
 export function HealthProvider({ children }: { children: ReactNode }) {
   const initializedRef = useRef(false);
-  const id = initializedRef.current ? '' : getUserId();
-  const [userId, setUserId] = useState(id);
+  const [userId] = useState(() => getUserId());
   const [healthData, setHealthData] = useState<HealthData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 

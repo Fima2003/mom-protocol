@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useHealth } from '@/lib/HealthContext';
+import { ResourceCounts } from '@/lib/healthData';
 
 interface ResourceCounterProps {
   icon: string;
@@ -11,16 +12,16 @@ interface ResourceCounterProps {
 
 export default function ResourceCounter({ icon, label, color }: ResourceCounterProps) {
   const { healthData, updateHealthData } = useHealth();
-  const storageKey = healthData ? `resource-${label}` as keyof typeof healthData.resources : null;
-  const count = healthData?.resources?.[storageKey as keyof typeof healthData.resources] || 0;
+  const storageKey = `resource-${label}` as keyof ResourceCounts;
+  const count = healthData?.resources?.[storageKey] ?? 0;
   const [animate, setAnimate] = useState(false);
 
   const increment = async () => {
-    const newCount = count + 1;
+    const newCount = (count as number) + 1;
     setAnimate(true);
     setTimeout(() => setAnimate(false), 300);
     
-    if (healthData) {
+    if (healthData?.resources) {
       await updateHealthData({
         resources: {
           ...healthData.resources,
