@@ -30,6 +30,13 @@ export default function Home() {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleResetAllData = () => {
+    if (confirm('Are you sure you want to erase ALL saved data? This cannot be undone.')) {
+      localStorage.clear();
+      window.location.reload();
+    }
+  };
+
   const fetchMomAdvice = async (activityList: Activity[]) => {
     setIsLoading(true);
     try {
@@ -151,6 +158,16 @@ export default function Home() {
           <p className="text-xs text-gray-600 mt-2">
             ~ Mom knows best ~
           </p>
+        </div>
+
+        {/* Admin Button */}
+        <div className="text-center">
+          <button
+            onClick={handleResetAllData}
+            className="bg-red-600 hover:bg-red-700 text-white border-4 border-black px-6 py-3 pixel-shadow transition-colors text-sm font-bold"
+          >
+            🗑️ Admin: Erase All Data
+          </button>
         </div>
       </div>
     </div>
