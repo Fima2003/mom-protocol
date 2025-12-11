@@ -8,7 +8,13 @@ import SleepLogger from '@/components/SleepLogger';
 import VentilationTracker from '@/components/VentilationTracker';
 
 export default function Home() {
-  const [completedTasks, setCompletedTasks] = useState(0);
+  const [completedTasks, setCompletedTasks] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('completedTasks');
+      return saved !== null ? parseInt(saved, 10) : 0;
+    }
+    return 0;
+  });
 
   // Mock task tracking - in reality you'd track actual interactions
   useEffect(() => {
@@ -16,7 +22,11 @@ export default function Home() {
       // Simulate task completion tracking
       const activities = document.querySelectorAll('button:active');
       if (activities.length > 0) {
-        setCompletedTasks(prev => prev + 1);
+        setCompletedTasks(prev => {
+          const newCount = prev + 1;
+          localStorage.setItem('completedTasks', newCount.toString());
+          return newCount;
+        });
       }
     }, 5000);
 

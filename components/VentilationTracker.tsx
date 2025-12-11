@@ -3,18 +3,31 @@
 import { useState, useEffect } from 'react';
 
 export default function VentilationTracker() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [isOpen, setIsOpen] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('ventilation-isOpen') === 'true';
+    }
+    return false;
+  });
+  const [timeRemaining, setTimeRemaining] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedTime = localStorage.getItem('ventilation-timeRemaining');
+      return savedTime ? parseInt(savedTime, 10) : 0;
+    }
+    return 0;
+  });
 
   useEffect(() => {
     if (timeRemaining > 0) {
       const timer = setInterval(() => {
         setTimeRemaining((prev) => {
-          if (prev <= 1) {
+          const newTime = prev <= 1 ? 0 : prev - 1;
+          localStorage.setItem('ventilation-timeRemaining', newTime.toString());
+          if (newTime === 0) {
             setIsOpen(false);
-            return 0;
+            localStorage.setItem('ventilation-isOpen', 'false');
           }
-          return prev - 1;
+          return newTime;
         });
       }, 1000);
       
@@ -26,6 +39,8 @@ export default function VentilationTracker() {
     if (!isOpen) {
       setIsOpen(true);
       setTimeRemaining(300); // 5 minutes in seconds
+      localStorage.setItem('ventilation-isOpen', 'true');
+      localStorage.setItem('ventilation-timeRemaining', '300');
     }
   };
 

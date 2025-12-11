@@ -7,7 +7,13 @@ interface HealthStatusProps {
 }
 
 export default function HealthStatus({ completedTasks }: HealthStatusProps) {
-  const [currentFeeling, setCurrentFeeling] = useState(5);
+  const [currentFeeling, setCurrentFeeling] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('currentFeeling');
+      return saved !== null ? parseInt(saved, 10) : 5;
+    }
+    return 5;
+  });
 
   const getPredictedStatus = () => {
     if (completedTasks > 5) {
@@ -38,7 +44,11 @@ export default function HealthStatus({ completedTasks }: HealthStatusProps) {
               min="1"
               max="10"
               value={currentFeeling}
-              onChange={(e) => setCurrentFeeling(Number(e.target.value))}
+              onChange={(e) => {
+                const newValue = Number(e.target.value);
+                setCurrentFeeling(newValue);
+                localStorage.setItem('currentFeeling', newValue.toString());
+              }}
               className="flex-1 h-4 border-2 border-black pixel-shadow"
               style={{
                 background: `linear-gradient(to right, #ef4444 0%, #fbbf24 50%, #22c55e 100%)`

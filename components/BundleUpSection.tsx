@@ -4,14 +4,18 @@ import { useState } from 'react';
 import ClothingItem from './ClothingItem';
 
 export default function BundleUpSection() {
-  const [clothing, setClothing] = useState({
-    socks: false,
-    sweater: false,
-    sweatpants: false,
+  const [clothing, setClothing] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('clothing-items');
+      return saved ? JSON.parse(saved) : { socks: false, sweater: false, sweatpants: false };
+    }
+    return { socks: false, sweater: false, sweatpants: false };
   });
 
   const toggleItem = (item: keyof typeof clothing) => {
-    setClothing({ ...clothing, [item]: !clothing[item] });
+    const newClothing = { ...clothing, [item]: !clothing[item] };
+    setClothing(newClothing);
+    localStorage.setItem('clothing-items', JSON.stringify(newClothing));
   };
 
   return (

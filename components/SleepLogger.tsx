@@ -7,12 +7,28 @@ interface SleepLoggerProps {
   icon: string;
 }
 
-export default function SleepLogger({ title, icon }: SleepLoggerProps) {
-  const [hours, setHours] = useState(8);
+export default function SleepLogger({ title }: SleepLoggerProps) {
+  const storageKey = `sleep-hours-${title}`;
+  const [hours, setHours] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(storageKey);
+      return saved !== null ? parseInt(saved, 10) : 8;
+    }
+    return 8;
+  });
   const [showZzz, setShowZzz] = useState(false);
 
-  const increment = () => setHours(Math.min(24, hours + 1));
-  const decrement = () => setHours(Math.max(0, hours - 1));
+  const increment = () => {
+    const newHours = Math.min(24, hours + 1);
+    setHours(newHours);
+    localStorage.setItem(storageKey, newHours.toString());
+  };
+
+  const decrement = () => {
+    const newHours = Math.max(0, hours - 1);
+    setHours(newHours);
+    localStorage.setItem(storageKey, newHours.toString());
+  };
 
   const logSleep = () => {
     setShowZzz(true);
